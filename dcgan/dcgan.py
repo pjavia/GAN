@@ -20,32 +20,36 @@ class Generator(nn.Module):
         # Generator
 
         if torch.cuda.is_available():
-            self.latent_variable = Variable(torch.Tensor(batch, 100).uniform_(-1, 1).cuda())
+            self.latent_variable = Variable(torch.FloatTensor(batch, 100).uniform_(-1, 1).cuda(), requires_grad=True)
         else:
-            self.latent_variable = Variable(torch.Tensor(batch, 100).uniform_(-1, 1))
+            self.latent_variable = Variable(torch.FloatTensor(batch, 100).uniform_(-1, 1),requires_grad=True)
         #self.latent_distribution = weight_init.uniform(self.latent_variable, -1, 1)
         self.latent_distribution = self.latent_variable
-        self.project = nn.Linear(100, 4 * 4 * 512)
-        self.batch_norm = nn.BatchNorm2d(128)
+        self.project = nn.Linear(100, 3 * 3 * 512)
+        #self.batch_norm_1 = nn.BatchNorm2d(256)
+        self.batch_norm_2 = nn.BatchNorm2d(128)
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
-        self.g_layer_1 = nn.ConvTranspose2d(512, 256, 5, 2, 2, 1)
-        self.g_layer_2 = nn.ConvTranspose2d(256, 128, 5, 2, 2, 1)
-        self.g_layer_3 = nn.ConvTranspose2d(128, 3, 5, 2, 2, 1)
+        self.g_layer_1 = nn.ConvTranspose2d(512, 256, 3, 2)
+        self.g_layer_2 = nn.ConvTranspose2d(256, 128, 3, 2)
+        self.g_layer_3 = nn.ConvTranspose2d(128, 3, 4, 2)
 
     def forward(self):
         # Generator
 
         z = self.project(self.latent_distribution)
-        z = z.view(batch, 512, 4, 4)
+        z = z.view(batch, 512, 3, 3)
+        #z = self.batch_norm_1(self.relu(self.g_layer_1(z)))
         z = self.relu(self.g_layer_1(z))
-        z = self.batch_norm(self.relu(self.g_layer_2(z)))
+        z = self.batch_norm_2(self.relu(self.g_layer_2(z)))
         G_z = self.tanh(self.g_layer_3(z))
 
         return G_z
 
     def criterion(self, f):
-        loss_g = torch.neg(torch.mean(torch.log(1 - f)))
+
+        loss_g = 0.5*torch.neg(torch.mean(torch.log(torch.clamp(f, min=1e-15, max=0.9999))))
+        #loss_g = 0.5*torch.mean(torch.log1p(f))
 
         return loss_g
 
@@ -56,7 +60,8 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         # Discriminator
         self.sigmoid = nn.Sigmoid()
-        self.batch_norm = nn.BatchNorm2d(256)
+        #self.batch_norm_1 = nn.BatchNorm2d(128)
+        self.batch_norm_2 = nn.BatchNorm2d(256)
         self.leaky_relu = nn.LeakyReLU(0.2)
         self.reduce = nn.Linear(512, 1)
         self.d_layer_1 = nn.Conv2d(3, 128, 5, 2)
@@ -67,8 +72,9 @@ class Discriminator(nn.Module):
 
         # Discriminator feed
 
+        #x = self.batch_norm_1(self.leaky_relu(self.d_layer_1(x)))
         x = self.leaky_relu(self.d_layer_1(x))
-        x = self.batch_norm(self.leaky_relu(self.d_layer_2(x)))
+        x = self.batch_norm_2(self.leaky_relu(self.d_layer_2(x)))
         x = self.leaky_relu(self.d_layer_3(x))
         x = x.view(batch, 512)
         x = self.sigmoid(self.reduce(x))
@@ -76,7 +82,9 @@ class Discriminator(nn.Module):
         return x
 
     def criterion(self, r, f):
-        loss_d = torch.neg(torch.mean(torch.log(r) + torch.log(1 - f)))
+
+        loss_d = 0.5*torch.neg(torch.mean(torch.log(torch.clamp(r, min=1e-15, max=0.9999999)) + torch.log(torch.clamp(1 - f, min=1e-15, max=0.9999999))))
+        #loss_d = 0.5*torch.mean(torch.log1p(r) + torch.log1p(1 - f))
 
         return loss_d
 
@@ -94,9 +102,10 @@ with open('collection.pickle', 'rb') as f:
     images = cPickle.load(f)
 
 print len(images)
-
-for epoch in xrange(1, 16):
+count = 0
+for epoch in xrange(1, 50):
     for i in range(0, len(images), batch):
+        count += 1
         batch_x = []
         for j in range(i, i + batch):
             batch_x.append(images[j])
@@ -105,32 +114,38 @@ for epoch in xrange(1, 16):
         #print batch_x
 
         batch_x = torch.from_numpy(batch_x)
-        r = Variable(batch_x.permute(0, 3, 1, 2))
+        r = Variable(batch_x.permute(0, 3, 1, 2), requires_grad=True)
 
         if torch.cuda.is_available():
             r = r.cuda()
 
         f = generator()
-        r = discriminator(r)
-        f = discriminator(f)
-        loss_d = discriminator.criterion(r, f)
+        real = discriminator(r)
+        fake = discriminator(f)
+        loss_d = discriminator.criterion(real, fake)
 
         optimizer_d.zero_grad()
         loss_d.backward()
         optimizer_d.step()
 
-        f = generator()
-        f = discriminator(f)
-        loss_g = generator.criterion(f)
+        if count%3 == 0:
 
-        optimizer_g.zero_grad()
-        loss_g.backward()
-        optimizer_g.step()
+            f = generator()
+            fake = discriminator(f)
+            loss_g = generator.criterion(fake)
 
-        print ('epoch -->', epoch, 'iteration -->', j, 'Loss_D -->', loss_d.data[0], 'Loss_G -->', loss_g.data[0])
+            optimizer_g.zero_grad()
+            loss_g.backward()
+            optimizer_g.step()
+
+            print ('epoch -->', epoch, 'iteration -->', i, 'Loss_D -->', loss_d.data[0], 'Loss_G -->', loss_g.data[0])
+
+        print ('epoch -->', epoch, 'iteration -->', i, 'Loss_D -->', loss_d.data[0])
 
     gen = generator()
-    #print gen.data
+    #print gen.data, 'Generated Data'
+    #print r, 'Real Data'
+    #gen = r
     gen = gen.permute(0, 2, 3, 1)
     gen = gen.data.cpu().numpy()
     img = []
