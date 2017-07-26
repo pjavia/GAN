@@ -1,5 +1,6 @@
 # DCGAN
-Discriminator ( </ br>
+Discriminator (
+
   (sigmoid): Sigmoid ()
   (batch_norm_2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True)
   (leaky_relu): LeakyReLU (0.2)
