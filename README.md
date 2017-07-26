@@ -1,6 +1,6 @@
 # Generative Adversarial Networks
 
-## 1. GAN
+## 1. GANs
 
 Play with shallow gan the min-max game
 
@@ -11,7 +11,7 @@ Play with shallow gan the min-max game
 ![alt text](https://github.com/pjavia/GAN/blob/master/gan/Discriminator%20loss.png)
 ![alt text](https://github.com/pjavia/GAN/blob/master/gan/Generator%20loss.png)
 
-## 2. DCGAN  
+## 2. DCGANs
 
 ### Architecture
 Discriminator (<br>
