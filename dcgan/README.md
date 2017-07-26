@@ -1,5 +1,5 @@
 # DCGAN
-Discriminator (
+Discriminator ( </ br>
   (sigmoid): Sigmoid ()
   (batch_norm_2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True)
   (leaky_relu): LeakyReLU (0.2)
@@ -17,3 +17,7 @@ Generator (
   (g_layer_2): ConvTranspose2d(256, 128, kernel_size=(3, 3), stride=(2, 2))
   (g_layer_3): ConvTranspose2d(128, 3, kernel_size=(4, 4), stride=(2, 2))
 )
+
+![alt text](https://github.com/pjavia/GAN/blob/master/gan/Discriminator%20loss.png)
+![alt text](https://github.com/pjavia/GAN/blob/master/gan/Generator%20loss.png)
+
