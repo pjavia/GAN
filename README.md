@@ -65,7 +65,7 @@ Generator (<br>
 #### epoch 15
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_15.png)
 
-## 3.  Improved DCGANs
-## 4.  Conditional GANs
-## 5.  InfoGANs
-## 6.  Wasserstein GANs
+
+## 3.  Conditional GANs
+## 4.  InfoGANs
+## 5.  Wasserstein GANs
