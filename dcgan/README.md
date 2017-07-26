@@ -21,33 +21,33 @@ Generator (<br>
 )<br>
 
 
-####epoch 1
+#### epoch 1
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_1.png)
-####epoch 2
+#### epoch 2
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_2.png)
-####epoch 3
+#### epoch 3
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_3.png)
-####epoch 4
+#### epoch 4
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_4.png)
-####epoch 5
+#### epoch 5
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_5.png)
-####epoch 6
+#### epoch 6
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_6.png)
-####epoch 7
+#### epoch 7
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_7.png)
-####epoch 8
+#### epoch 8
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_8.png)
-####epoch 9
+#### epoch 9
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_9.png)
-####epoch 10
+#### epoch 10
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_10.png)
-####epoch 11
+#### epoch 11
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_11.png)
-####epoch 12
+#### epoch 12
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_12.png)
-####epoch 13
+#### epoch 13
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_13.png)
-####epoch 14
+#### epoch 14
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_14.png)
-####epoch 15
+#### epoch 15
 ![alt text](https://github.com/pjavia/GAN/blob/master/dcgan/images/image_15.png)
