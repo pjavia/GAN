@@ -11,7 +11,7 @@ Play with shallow gan the min-max game
 
 ``` localhost:6006 ```
 
-![alt text](https://github.com/pjavia/GAN/blob/master/gan/Discriminator%20loss.png)
-![alt text](https://github.com/pjavia/GAN/blob/master/gan/Generator%20loss.png)
-![alt text](https://github.com/pjavia/GAN/blob/master/gan/graph-run%3D.png)
+![alt text](https://github.com/pjavia/GAN/blob/master/gan/Discriminator_loss.png)
+![alt text](https://github.com/pjavia/GAN/blob/master/gan/Generator_loss.png)
+![alt text](https://github.com/pjavia/GAN/blob/master/gan/graph.png)
 
