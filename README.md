@@ -1,6 +1,6 @@
 # Generative Adversarial Networks
 
-## 1. GANs
+## 1. GANs (Tensorflow)
 
 Play with shallow gan the min-max game
 
@@ -12,7 +12,7 @@ Play with shallow gan the min-max game
 ![alt text](https://github.com/pjavia/GAN/blob/master/gan/Discriminator_loss.png)
 ![alt text](https://github.com/pjavia/GAN/blob/master/gan/Generator_loss.png)
 
-## 2. DCGANs
+## 2. DCGANs (PyTorch)
 
 ### Architecture
 Discriminator (<br>
