@@ -5,63 +5,113 @@ import numpy as np
 
 gan = tf.Graph()
 batch = 100
+projection = 20
+learning_rate=0.0002
 
 class GAN:
 	
 	def __init__(self):
 
-		self.keep_prob = tf.placeholder(tf.float32, [])
-		self.training = tf.placeholder(tf.bool)
-		
 
-	def generator(self, inputs_G):
+		self.layer_G_1_neurons = 200
+		self.layer_G_2_neurons = 400
+		self.layer_G_3_neurons = 400
+		self.layer_G_4_neurons = 784
 
+		self.layer_D_1_neurons = 200
+		self.layer_D_2_neurons = 400
+		self.layer_D_3_neurons = 400
+		self.layer_D_4_neurons = 1
+
+	def generator(self, inputs_G, p):
 
 		with tf.variable_scope("Generator"):
-			
-			layer_G_1 = tf.contrib.layers.fully_connected(inputs=inputs_G, num_outputs=100, activation_fn=tf.nn.relu)
-			layer_G_2 = tf.contrib.layers.dropout(tf.contrib.layers.fully_connected(inputs=layer_G_1, num_outputs=400, activation_fn=tf.nn.relu), is_training=self.training)
-			layer_G_3 = tf.contrib.layers.dropout(tf.contrib.layers.fully_connected(inputs=layer_G_2, num_outputs=600, activation_fn=tf.nn.relu), is_training=self.training)
-			output_G = tf.contrib.layers.fully_connected(inputs=layer_G_3, num_outputs=784, activation_fn=tf.nn.tanh)
 
-		return output_G
+			layer_G_1_W = tf.get_variable("layer_G_1_W", shape=[projection, self.layer_G_1_neurons], dtype=tf.float32)
+			layer_G_1_b = tf.get_variable("layer_G_1_b", shape=[self.layer_G_1_neurons], dtype=tf.float32)
 
-	def discriminator(self, inputs_D, reuse):
+			layer_G_2_W = tf.get_variable("layer_G_2_W", shape=[self.layer_G_1_neurons, self.layer_G_2_neurons], dtype=tf.float32)
+			layer_G_2_b = tf.get_variable("layer_G_2_b", shape=[self.layer_G_2_neurons], dtype=tf.float32)
+ 
+			layer_G_3_W = tf.get_variable("layer_G_3_W", shape=[self.layer_G_2_neurons, self.layer_G_3_neurons], dtype=tf.float32)
+			layer_G_3_b = tf.get_variable("layer_G_3_b", shape=[self.layer_G_3_neurons], dtype=tf.float32)
 
-		with tf.variable_scope("Discriminator", reuse=reuse) as Discriminator:
+			layer_G_4_W = tf.get_variable("layer_G_4_W", shape=[self.layer_G_3_neurons, self.layer_G_4_neurons], dtype=tf.float32)
+			layer_G_4_b = tf.get_variable("layer_G_4_b", shape=[self.layer_G_4_neurons], dtype=tf.float32)
 
-			layer_D_1 = tf.contrib.layers.fully_connected(inputs=inputs_D, num_outputs=600, activation_fn=tf.nn.relu)
-			layer_D_2 = tf.contrib.layers.dropout(tf.contrib.layers.fully_connected(inputs=layer_D_1, num_outputs=400, activation_fn=tf.nn.relu), is_training=self.training)
-			layer_D_3 = tf.contrib.layers.dropout(tf.contrib.layers.fully_connected(inputs=layer_D_2, num_outputs=100, activation_fn=tf.nn.relu), is_training=self.training)
-			output_D = tf.contrib.layers.fully_connected(inputs=layer_D_3, num_outputs=1, activation_fn=tf.sigmoid)
+		
+			layer_G_1 = tf.nn.relu(tf.add(tf.matmul(inputs_G, layer_G_1_W), layer_G_1_b))
+			layer_G_2 = tf.nn.dropout(tf.nn.relu(tf.add(tf.matmul(layer_G_1, layer_G_2_W), layer_G_2_b)), keep_prob=p)
+			layer_G_3 = tf.nn.dropout(tf.nn.relu(tf.add(tf.matmul(layer_G_2, layer_G_3_W), layer_G_3_b)), keep_prob=p)
+			sample = tf.sigmoid(tf.add(tf.matmul(layer_G_3, layer_G_4_W), layer_G_4_b))
+
+		return sample
+		
+
+	def discriminator(self, inputs_D, reuse, p):
+
+		with tf.variable_scope("Discriminator", reuse=reuse):			
+
+			layer_D_1_W = tf.get_variable("layer_D_1_W", shape=[784, self.layer_D_1_neurons], dtype=tf.float32)
+			layer_D_1_b = tf.get_variable("layer_D_1_b", shape=[self.layer_D_1_neurons], dtype=tf.float32)
+
+			layer_D_2_W = tf.get_variable("layer_D_2_W", shape=[self.layer_D_1_neurons, self.layer_D_2_neurons], dtype=tf.float32)
+			layer_D_2_b = tf.get_variable("layer_D_2_b", shape=[self.layer_D_2_neurons], dtype=tf.float32)
+ 
+			layer_D_3_W = tf.get_variable("layer_D_3_W", shape=[self.layer_D_2_neurons, self.layer_D_3_neurons], dtype=tf.float32)
+			layer_D_3_b = tf.get_variable("layer_D_3_b", shape=[self.layer_D_3_neurons], dtype=tf.float32)
+
+			layer_D_4_W = tf.get_variable("layer_D_4_W", shape=[self.layer_D_3_neurons, self.layer_D_4_neurons], dtype=tf.float32)
+			layer_D_4_b = tf.get_variable("layer_D_4_b", shape=[self.layer_D_4_neurons], dtype=tf.float32)
+
+		with tf.variable_scope("Discriminator", reuse=reuse):
+
+			layer_D_1 = tf.nn.relu(tf.add(tf.matmul(inputs_D, layer_D_1_W), layer_D_1_b))
+			layer_D_2 = tf.nn.dropout(tf.nn.relu(tf.add(tf.matmul(layer_D_1, layer_D_2_W), layer_D_2_b)), keep_prob=p)# , is_training=self.is_training)
+			layer_D_3 = tf.nn.dropout(tf.nn.relu(tf.add(tf.matmul(layer_D_2, layer_D_3_W), layer_D_3_b)), keep_prob=p)#, is_training=self.is_training)
+			real_or_fake = tf.sigmoid(tf.add(tf.matmul(layer_D_3, layer_D_4_W), layer_D_4_b))
+
+		return real_or_fake
+
+
 
 	
 
-		return output_D
+
+
+gan = tf.Graph()
 
 with gan.as_default():
-
-	inputs_G = tf.placeholder(tf.float32, [batch, 10])
-	inputs_D = tf.placeholder(tf.float32, [batch, 784])
 
 	model = GAN()
 
 	
+	p = inputs_G = tf.placeholder(tf.float32, [])
+	inputs_G = tf.placeholder(tf.float32, [batch, projection])
 
-	r = model.discriminator(inputs_D, None)
-	sample = model.generator(inputs_G)
-	f = model.discriminator(sample, True)
+	inputs_D = tf.placeholder(tf.float32, [batch, 784])
 
-	
 
+	sample = model.generator(inputs_G, p)
+	f = model.discriminator(sample, None, p)
+	r = model.discriminator(inputs_D, True, p)
+
+	# Loss and  training
+
+	weights_of_model = tf.trainable_variables()
+
+	Generator_knowledge = [variables for variables in weights_of_model if 'Generator' in variables.name]
+	print Generator_knowledge
+	Discriminator_knowledge = [variables for variables in weights_of_model if 'Discriminator' in variables.name]
+	print Discriminator_knowledge
 
 	loss_D = -0.5*tf.reduce_mean(tf.log(tf.clip_by_value(r, clip_value_min=1e-15, clip_value_max=0.9999999)) + tf.log(tf.clip_by_value(1 - f, clip_value_min=1e-15, clip_value_max=0.9999999)))
 	loss_G = -0.5*tf.reduce_mean(tf.log(tf.clip_by_value(f, clip_value_min=1e-15, clip_value_max=0.9999999)))
 
-	opt_D = tf.train.AdamOptimizer()
-	opt_G = tf.train.AdamOptimizer()
-	train_opt_D = opt_D.minimize(loss_D)
-	train_opt_G = opt_G.minimize(loss_G)
+	opt_D = tf.train.AdamOptimizer(learning_rate=learning_rate)
+	opt_G = tf.train.AdamOptimizer(learning_rate=learning_rate)
+	train_opt_D = opt_D.minimize(loss_D, var_list=Discriminator_knowledge)
+	train_opt_G = opt_G.minimize(loss_G, var_list=Generator_knowledge)
 
 	
 
@@ -85,24 +135,28 @@ with tf.Session(graph=gan) as sess:
 	#for op in tf.get_default_graph().get_operations():
 	#	print op.values() 
 
+	for epoch in range(0, 20):
 
-	for iterations in range(0, 1000):
+		for iterations in range(0, 600):
 
-		for d in range(0, 3):
+			for d in range(0, 1):
 
-			batch_xs, batch_ys = mnist.train.next_batch(batch)
-			l_d, _= sess.run([loss_D, train_opt_D], feed_dict={inputs_D: batch_xs, inputs_G: 2.0*np.random.random_sample((batch, 10))-1.0, model.keep_prob:0.5, model.training:True})
-			print l_d, iterations, d, 'Discriminator loss'
+				batch_xs, batch_ys = mnist.train.next_batch(batch)
+				l_d, _= sess.run([loss_D, train_opt_D], feed_dict={inputs_D: batch_xs, inputs_G: np.random.uniform(0.0, 1.0,(batch, projection)), p: 0.5})
+				print l_d, iterations, d, 'Discriminator loss'
+
+		
+
+			for g in range(0, 1):
+
+				batch_xs, batch_ys = mnist.train.next_batch(batch)
+				l_g, _= sess.run([loss_G, train_opt_G], feed_dict={inputs_D: batch_xs, inputs_G: np.random.uniform(0.0, 1.0,(batch, projection)), p: 0.5})
+				print l_g, iterations, g, 'Generator loss'
 
 
-		for g in range(0, 2):
+		summary_full = sess.run(summary_op, feed_dict={inputs_D: batch_xs, inputs_G: np.random.uniform(0.0, 1.0,(batch, projection)), p: 1.0})
+		train_writer.add_summary(summary_full, epoch)
 
-			batch_xs, batch_ys = mnist.train.next_batch(batch)
-			l_g, _= sess.run([loss_G, train_opt_G], feed_dict={inputs_D: batch_xs, inputs_G: 2.0*np.random.random_sample((batch, 10))-1.0, model.keep_prob:0.5, model.training:True})
-			print l_g, iterations, g, 'Generator loss'
-
-		summary_full = sess.run(summary_op, feed_dict={inputs_D: batch_xs, inputs_G: 2.0*np.random.random_sample((batch, 10))-1.0, model.keep_prob:0.5, model.training:False})
-		train_writer.add_summary(summary_full, iterations)
 
 
 			
